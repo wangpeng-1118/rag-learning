@@ -11,6 +11,7 @@ class Document:
 def load_txt(file_path: str | Path) -> Document:
     """读取单个 TXT 文件， 并返回 Document 对象 """
 
+    # 将路径转换为方便操作的对象
     path = Path(file_path)
 
     if not path.exists():

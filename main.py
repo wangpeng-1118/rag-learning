@@ -1,6 +1,8 @@
 
 from rag.loader import load_txt
 from rag.splitter import split_text
+from rag.embeddings import EmbeddingModel
+from rag.retriever import retrieve
 
 
 def main():
@@ -12,20 +14,30 @@ def main():
         overlap=30,
     )
 
-    print(f"原始文档：{document.metadata['file_name']}")
-    print(f"原始文本长度：{len(document.page_content)}")
-    print(f"切分后 Chunk 数量：{len(chunks)}")
+    embedding_model = EmbeddingModel()
 
-    for index, chunk in enumerate(chunks):
-        print(f"\n--- Chunk {index + 1} ---")
-        print(chunk.page_content)
-        print("元数据：", chunk.metadata)
+    texts = [chunk.page_content for chunk in chunks]
+    chunk_vectors = embedding_model.encode(texts)
+
+    query = "How does RAG retrieve relevant information?"
+
+    results = retrieve(
+        query=query,
+        chunks=chunks,
+        chunk_vectors=chunk_vectors,
+        embedding_model=embedding_model,
+        top_k=3,
+    )
+
+    print(f"\n用户问题：{query}")
+    print("\n检索结果：")
+
+    for rank, result in enumerate(results, start=1):
+        print(f"\n排名：{rank}")
+        print(f"相似度：{result['score']:.4f}")
+        print(f"文本：{result['document'].page_content}")
+        print(f"来源：{result['document'].metadata['file_name']}")
 
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
